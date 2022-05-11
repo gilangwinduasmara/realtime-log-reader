@@ -8,7 +8,7 @@ class FileController extends Controller {
         if (path) {            
             const files = await fs.readdir(path);
             const data = await Promise.all(files.map(async file => {
-                const lines = await readLastLines.read(path+'/'+file, 2);
+                const lines = await readLastLines.read(path+'/'+file, 50);
                 return {
                     path: file,
                     data: lines,
