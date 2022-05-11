@@ -6,7 +6,7 @@ class FileController extends Controller {
     public get = async (req:Request, res:Response) => {
         const path = process.env.LOG_PATH;
         if (path) {            
-            const files = await fs.readdir(path);
+            const files = await (await fs.readdir(path)).filter(file => file.endsWith('.log'));
             const data = await Promise.all(files.map(async file => {
                 const lines = await readLastLines.read(path+'/'+file, 50);
                 return {

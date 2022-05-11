@@ -27,7 +27,7 @@ const emitFileChange = (path:string, filename:string) => {
 }
 
 fs.watch(process.env.LOG_PATH + '/', (event, filename) => {
-    if (filename) {
+    if (filename.endsWith('.log')) {
         const path = process.env.LOG_PATH + '/' + filename;
         console.log(`File ${path} Changed`);
         emitFileChange(path, filename)
