@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import fs from 'fs';
 import http from 'http';
-import {Server} from 'socket.io';
+import readLastLines from 'read-last-lines';
+import { Server } from 'socket.io';
 import app from './app';
 import FileController from './controllers/FileController';
 
@@ -15,15 +16,22 @@ const clients = new Set();
 
 const fileController = new FileController(router);
 
-fs.watch(process.env.LOG_PATH+'/',(event,filename)=>{
-    if(filename)
-        console.log(`File ${filename} Changed`);
-        fs.readFile(process.env.LOG_PATH+'/'+filename, 'utf8', function(err, data){
-            io.emit('file-changed', {
-                path: filename,
-                data,
-            });
+const emitFileChange = (path:string, filename:string) => {
+    readLastLines.read(path, 2)
+    .then((lines) => {
+        io.emit('file-changed', {
+            path: filename,
+            data: lines,
         });
+    });
+}
+
+fs.watch(process.env.LOG_PATH + '/', (event, filename) => {
+    if (filename) {
+        const path = process.env.LOG_PATH + '/' + filename;
+        console.log(`File ${path} Changed`);
+        emitFileChange(path, filename)
+    }
 });
 
 router.get('/tes', (req, res) => res.send('ok'));
@@ -34,8 +42,11 @@ router.route('/files')
 app.use(router);
 
 io.on("connection", (socket) => {
-    clients.add(socket.id)
-    console.log('client connected')
+    console.log(clients)
+    if(!clients.has(socket.id)) {
+        clients.add(socket.id)
+        console.log('client connected')
+    }
 });
 
 server.listen(port, () => {
