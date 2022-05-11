@@ -17,7 +17,7 @@ const clients = new Set();
 const fileController = new FileController(router);
 
 const emitFileChange = (path:string, filename:string) => {
-    readLastLines.read(path, 2)
+    readLastLines.read(path, 50)
     .then((lines) => {
         io.emit('file-changed', {
             path: filename,
